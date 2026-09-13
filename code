@@ -1,0 +1,61 @@
+give me  a complete detail of this code and name of project of this code 
+
+
+from machine import Pin, PWM, ADC
+import time
+
+# Pins
+pir = Pin(4, Pin.IN)
+led = Pin(5, Pin.OUT)
+buzzer = PWM(Pin(6))
+pot = ADC(Pin(0))  # Potentiometer2
+
+buzzer.duty(0)
+
+# Notes (frequency in Hz)
+NOTES = {
+    "C4": 262, "D4": 294, "E4": 330, "F4": 349,
+    "G4": 392, "A4": 440, "B4": 494, "C5": 523
+}
+
+# Happy Birthday melody
+melody = [
+    ("C4",0.3), ("C4",0.3), ("D4",0.6), ("C4",0.6), ("F4",0.6), ("E4",1),
+    ("C4",0.3), ("C4",0.3), ("D4",0.6), ("C4",0.6), ("G4",0.6), ("F4",1),
+]
+
+def play_tone(freq, duration):
+    buzzer.freq(freq)
+    buzzer.duty(512)
+    time.sleep(duration)
+    buzzer.duty(0)
+
+def play_song(speed_factor):
+    for note, duration in melody:
+        play_tone(NOTES[note], duration * speed_factor)
+        time.sleep(0.05)
+
+# Warm-up
+# print("Warming up...")
+# time.sleep(2)
+
+while True:
+    if pir.value() == 1:
+        print("Motion detected!")
+        led.on()
+
+        # Read potentiometer (0–4095)
+        pot_value = pot.read()
+        
+        # Convert to speed (0.5x to 2x)
+        speed = 0.5 + (pot_value / 4095) * 1.5
+        
+        play_song(speed)
+
+    else:
+        led.off()
+        buzzer.duty(0)
+
+    time.sleep(0.2)
+
+
